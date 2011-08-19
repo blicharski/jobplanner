@@ -48,13 +48,17 @@ class TaskAccept(QtGui.QPushButton):
           "background-repeat:no-repeat;"
         )
 
-class TaskTimePanel(QtGui.QFrame):
+class TaskClock(QtGui.QPushButton):
     def __init__(self, id, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.layout = QtGui.QHBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setMargin(0)
-
+        self.setMaximumSize(25, 25)
+        self.setStyleSheet(
+          "background-image: url(../img/clock.png);"
+          "background-repeat:no-repeat;"
+        )
 
 
 class TaskEdit(QtGui.QLineEdit):
@@ -82,6 +86,7 @@ class TaskWidget(QtGui.QFrame):
         self.remove_btn = TaskRemove(id)
         self.edit_btn = TaskEdit(id)
         self.accept_btn = TaskAccept(id)
+        self.clock_btn = TaskClock(id)
 
         self.layout = QtGui.QHBoxLayout()
         self.layout.setSpacing(0)
@@ -90,6 +95,7 @@ class TaskWidget(QtGui.QFrame):
         self.layout.addWidget(self.remove_btn)
         self.layout.addWidget(self.edit_btn)
         self.layout.addWidget(self.accept_btn)
+        self.layout.addWidget(self.clock_btn)
 
         self.setLayout(self.layout)
         self.setup_signals()

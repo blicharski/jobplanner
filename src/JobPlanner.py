@@ -49,6 +49,14 @@ class MainWindow(QtGui.QWidget):
     def setup_slots(self):
         pass
 
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?", 
+                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
     def get_task_by_id(self, task_id):
         for task in self.tasks_list:
             if task.id == task_id:
