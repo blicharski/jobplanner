@@ -1,6 +1,4 @@
-import sys
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+
 from TaskWidget import *
 
 class MainWindow(QtGui.QWidget):
@@ -50,7 +48,7 @@ class MainWindow(QtGui.QWidget):
         pass
 
     def closeEvent(self, event):
-        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?", 
+        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
@@ -81,35 +79,6 @@ class MainWindow(QtGui.QWidget):
         self.connect(task, QtCore.SIGNAL('textEntered'), self.task_edited)
 
 
-class ApplicationSystemTry(QtGui.QSystemTrayIcon):
-    def __init__(self, parent = None):
-        self.icon = QtGui.QIcon('../img/systray.png')
-        QtGui.QSystemTrayIcon.__init__(self, self.icon, parent)
-        self.connect(self, QtCore.SIGNAL('activated(QSystemTrayIcon::ActivationReason)'), self.tray_clicked)
-        self.parent = parent
-        self.parent_minimized = False
-        self.set_parent_window_position()
-
-    def tray_clicked(self, reason):
-        if reason == self.Trigger:
-            if self.parent_minimized == False:
-                self.parent.setVisible(False)
-                self.parent_minimized = True
-            else:
-                self.set_parent_window_position()
-                self.parent.setVisible(True)
-                self.parent_minimized = False
-
-    def set_parent_window_position(self):
-        self.parent.move(self.geometry().x(), self.geometry().y())
 
 
-app = QtGui.QApplication(sys.argv)
-
-main_win = MainWindow()
-systry = ApplicationSystemTry(main_win)
-systry.show()
-main_win.show()
-
-sys.exit(app.exec_())
 

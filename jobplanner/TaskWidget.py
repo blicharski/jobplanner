@@ -11,7 +11,7 @@ class TaskRemove(QtGui.QPushButton):
         self.setMaximumSize(25, 25)
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setStyleSheet(
-          "background-image: url(../img/delete.png);"
+          "background-image: url(img/delete.png);"
           "background-repeat:no-repeat;"
         )
 
@@ -24,11 +24,11 @@ class TaskRemove(QtGui.QPushButton):
     def cancel_delete(self):
         self.button_clicked = 0
         self.icon_changer_timer.cancel()
-        self.setStyleSheet("background-image: url(../img/delete.png);")
+        self.setStyleSheet("background-image: url(img/delete.png);")
 
     def on_remove(self):
         if self.button_clicked == 0:
-            self.setStyleSheet("background-image: url(../img/delete_confirm.png);")
+            self.setStyleSheet("background-image: url(img/delete_confirm.png);")
             self.button_clicked = 1
             self.icon_changer_timer = Timer(1, self.send_cancel_delete_signal)
             self.icon_changer_timer.start()
@@ -44,7 +44,7 @@ class TaskAccept(QtGui.QPushButton):
         self.setMaximumSize(25, 25)
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setStyleSheet(
-          "background-image: url(../img/accept.png);"
+          "background-image: url(img/accept.png);"
           "background-repeat:no-repeat;"
         )
 
@@ -56,7 +56,7 @@ class TaskClock(QtGui.QPushButton):
         self.layout.setMargin(0)
         self.setMaximumSize(25, 25)
         self.setStyleSheet(
-          "background-image: url(../img/clock.png);"
+          "background-image: url(img/clock.png);"
           "background-repeat:no-repeat;"
         )
 

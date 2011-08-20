@@ -2,9 +2,10 @@
 
 class ResourceManager:
     __instance = None
+    images_root_dir = './img/'
 
     def __init__(self, root_path):
-        self.root_path = root_path
+        self.images_root_dir = root_path
 
     def __new__(classtype, *args, **kwargs):
         if classtype != type(classtype.__instance):
