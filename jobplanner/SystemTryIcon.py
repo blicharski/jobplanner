@@ -2,7 +2,7 @@
 
 class ApplicationSystemTry(QtGui.QSystemTrayIcon):
     def __init__(self, parent = None):
-        self.icon = QtGui.QIcon('../img/systray.png')
+        self.icon = QtGui.QIcon(resourceManager.get_image("systry"))
         QtGui.QSystemTrayIcon.__init__(self, self.icon, parent)
         self.connect(self, QtCore.SIGNAL('activated(QSystemTrayIcon::ActivationReason)'), self.tray_clicked)
         self.parent = parent
