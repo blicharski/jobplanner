@@ -1,58 +1,61 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from threading import Timer
-from ResourceManager import *
 
-class TaskRemove(QtGui.QPushButton):
+from datetime import datetime
+from threading import Timer
+from PyQt4.QtCore import SIGNAL, Qt
+from PyQt4.QtGui import QPushButton, QWidget, QLineEdit, QFrame, QHBoxLayout, QLabel
+
+from DataModel import TaskModel
+from ResourceManager import resourceManager
+
+class TaskRemove(QPushButton):
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
         self.id = id
-        self.button_clicked = 0
+        self.button_clicked = False
         self.icon_changer_timer = None
         self.setMaximumSize(resourceManager.get_icon_image_max_size())
-        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self.setFocusPolicy(Qt.ClickFocus)
         self.setStyleSheet(
           "background-image: url(" + resourceManager.get_image('delete') + ");"
           "background-repeat:no-repeat;"
         )
 
-        self.connect(self, QtCore.SIGNAL('clicked()'), self.on_remove)
-        self.connect(self, QtCore.SIGNAL('cancel_delete'), self.cancel_delete)
+        self.connect(self, SIGNAL('clicked()'), self.on_remove)
+        self.connect(self, SIGNAL('cancel_delete'), self.cancel_delete)
 
     def send_cancel_delete_signal(self):
-        self.emit(QtCore.SIGNAL('cancel_delete'), ())
+        self.emit(SIGNAL('cancel_delete'), ())
 
     def cancel_delete(self):
-        self.button_clicked = 0
+        self.button_clicked = False
         self.icon_changer_timer.cancel()
         self.setStyleSheet("background-image: url(" + resourceManager.get_image('delete') + ");")
 
     def on_remove(self):
-        if self.button_clicked == 0:
+        if self.button_clicked == False:
             self.setStyleSheet("background-image: url(" + resourceManager.get_image('delete_confirm') + ");")
-            self.button_clicked = 1
+            self.button_clicked = True
             self.icon_changer_timer = Timer(1, self.send_cancel_delete_signal)
             self.icon_changer_timer.start()
         else:
             self.icon_changer_timer.cancel()
-            self.emit(QtCore.SIGNAL('task_removed'), (self.id))
+            self.emit(SIGNAL('task_removed'), (self.id))
 
-
-class TaskAccept(QtGui.QPushButton):
+class TaskAccept(QPushButton):
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
         self.id = id
         self.setMaximumSize(resourceManager.get_icon_image_max_size())
-        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self.setFocusPolicy(Qt.ClickFocus)
         self.setStyleSheet(
           "background-image: url(" + resourceManager.get_image('accept') + ");"
           "background-repeat:no-repeat;"
         )
 
-class TaskClock(QtGui.QPushButton):
+class TaskClock(QPushButton):
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        self.layout = QtGui.QHBoxLayout()
+        QWidget.__init__(self, parent)
+        self.layout = QHBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setMargin(0)
         self.setMaximumSize(resourceManager.get_icon_image_max_size())
@@ -61,30 +64,33 @@ class TaskClock(QtGui.QPushButton):
           "background-repeat:no-repeat;"
         )
 
-class TaskEdit(QtGui.QLineEdit):
+class TaskEdit(QLineEdit):
     minimum_width = 10 # Minimum width in chars
 
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
         self.id = id
         self.setMinimumWidth(resourceManager.get_widthest_char_size(self)
                              * self.minimum_width)
         #self.setStyleSheet(
         #    "background-color: white;"
         #)
+    
+    def get_text(self):
+        return {"name": self.displayText()}
 
 
-class TimeEdit(QtGui.QFrame):
+class TimeEdit(QFrame):
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        self.hour_from = QtGui.QLineEdit(self)
+        QWidget.__init__(self, parent)
+        self.hour_from = QLineEdit(self)
         self.init_entry(self.hour_from)
-        self.hour_to   = QtGui.QLineEdit(self)
+        self.hour_to   = QLineEdit(self)
         self.init_entry(self.hour_to)
-        self.hours_count = QtGui.QLineEdit(self)
+        self.hours_count = QLineEdit(self)
         self.init_entry(self.hours_count)
         
-        self.layout = QtGui.QHBoxLayout()
+        self.layout = QHBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setMargin(0)
 
@@ -122,66 +128,83 @@ class TimeEdit(QtGui.QFrame):
 
             self.hours_count.setText(str(hours_count) + "." + str(mins_count))
         
-        event.accept()
+        #event.accept()
 
     def init_entry(self, entry):
-        entry.setAlignment(QtCore.Qt.AlignCenter)
+        entry.setAlignment(Qt.AlignCenter)
         entry.setMaxLength(5)
         entry.setMinimumWidth(resourceManager.get_widthest_char_size(entry) * 3)
         entry.setMaximumWidth(resourceManager.get_widthest_char_size(entry) * 3)
+
+    def get_text(self):
+        return {
+                "hour_from": self.hour_from.text(), 
+                "hour_to": self.hour_to.text(), 
+                "hours_count": self.hours_count.text()
+                }
         
 
-    def count_hours(self):
-        hour_start = self.hour_from.displayText()
-        print("XXXXX" + hour_start)
-
-
-class TaskWidget(QtGui.QFrame):
+class TaskWidget(QFrame):
+    """ Graphically represents one task. It gains information from the user and stores it in
+        internal variables, which could be getted by extract_task_object() method.
+        
+        Functions:
+        extract_task_objects(): returns an object of the Task class.
+    """
     def __init__(self, id, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
         self.id = id
-        self.greened = False
+        self.finished = False
         self.remove_btn = TaskRemove(id)
         self.edit_btn = TaskEdit(id)
         self.accept_btn = TaskAccept(id)
         self.time_btn = TimeEdit(id)
-        #self.clock_btn = TaskClock(id)
 
-        self.layout = QtGui.QHBoxLayout()
+        self.layout = QHBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setMargin(0)
 
         self.layout.addWidget(self.remove_btn)
-        self.layout.addWidget(self.edit_btn)
         self.layout.addWidget(self.accept_btn)
+        self.layout.addWidget(self.edit_btn)
         self.layout.addWidget(self.time_btn)
-        #self.layout.addWidget(self.clock_btn)
 
         self.setLayout(self.layout)
         self.setup_signals()
 
     def setup_signals(self):
-        self.connect(self.accept_btn, QtCore.SIGNAL('clicked()'), self.on_accept)
-        self.connect(self.edit_btn, QtCore.SIGNAL('returnPressed()'), self.emit_text_entered)
+        self.connect(self.accept_btn, SIGNAL('clicked()'), self.on_accept)
+        self.connect(self.edit_btn, SIGNAL('returnPressed()'), self.emit_text_entered)
+        self.connect(self.time_btn.hours_count, SIGNAL('returnPressed()'), self.emit_text_entered)
 
     def emit_text_entered(self):
-        self.emit(QtCore.SIGNAL('textEntered'), (self.id))
+        self.emit(SIGNAL('textEntered'), (self.id))
 
     def setFocus(self):
         self.edit_btn.setFocus()
 
     def on_accept(self):
-        if self.greened == False:
+        if self.finished == False:
             self.edit_btn.setStyleSheet(
                 "background-color: green;"
                 "color: white;"
                 )
-            self.greened = True
+            self.finished = True
         else:
             self.edit_btn.setStyleSheet(
                 "background-color: white;"
                 "color: black;"
                 )
-            self.greened = False
+            self.finished = False
+
+    def extract_task_object(self):
+        task = TaskModel()
+        task.date = str(datetime.now()).split(".")[0]
+        task.finished = self.finished
+        task.name = self.edit_btn.get_text()["name"]
+        # XXX: Warning! True only if dictionary returned by time_btn.get_text() haven't been changed by
+        #      insertions/deletions.
+        task.hour_from, task.hour_to, task.hours_count = self.time_btn.get_text().values()
+        return task
 

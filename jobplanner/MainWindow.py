@@ -1,13 +1,17 @@
 
+from PyQt4.QtCore import SIGNAL, QCoreApplication
+from PyQt4.QtGui import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox, QLabel
 from TaskWidget import *
 
-class MainWindow(QtGui.QWidget):
+
+class MainWindow(QWidget):
     def __init__(self, init_num_task = 3, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
         self.setWindowTitle("Job planner")
         self.tasks_list = []
         self.next_task_id = 0
-
+        
+        self.options_panel = QFrame()
         self.build_layout()
         self.add_function_buttons()
         self.setup_slots()
@@ -26,34 +30,43 @@ class MainWindow(QtGui.QWidget):
         self.tasks_list[task_index+1].setFocus()
 
     def build_layout(self):
-        self.layout = QtGui.QVBoxLayout()
+        self.layout = QVBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setMargin(0)
-        #self.layout.setDirection(3)
         self.setLayout(self.layout)
+        
+        self.options_layout = QHBoxLayout()
+        self.options_layout.setSpacing(0)
+        self.options_layout.setMargin(0)
+        self.options_panel.setLayout(self.options_layout)
+        
         #self.setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #34ABF9, stop: 1 #177BD8);")
 
+    def build_options_panel(self):
+        self.options_layout = QHBoxLayout()
+        self.options_layout.setSpacing(0)
+        self.options_layout.setMargin(0)
+
     def add_function_buttons(self):
-        self.exit_btn = QtGui.QPushButton('Exit')
-        self.connect(self.exit_btn, QtCore.SIGNAL('clicked()'), exit)
 
-        self.add_task_btn = QtGui.QPushButton('Add new task')
-        self.connect(self.add_task_btn, QtCore.SIGNAL('clicked()'), self.add_new_task)
-
-        #self.layout.addWidget(self.exit_btn)
-        self.layout.addWidget(self.add_task_btn)
-
+        self.export_btn = QPushButton('Export')
+        self.add_task_btn = QPushButton('Add new task')
+        
+        self.layout.addWidget(self.options_panel)
+        self.options_layout.addWidget(self.add_task_btn)
+        self.options_layout.addWidget(self.export_btn)
 
     def setup_slots(self):
-        pass
+        self.connect(self.export_btn, SIGNAL('clicked()'), self.export)
+        self.connect(self.add_task_btn, SIGNAL('clicked()'), self.add_new_task)
 
     def closeEvent(self, event):
-        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure to quit?",
-                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-        if reply == QtGui.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+        #reply = QMessageBox.question(self, 'Message', "Are you sure to quit?",
+        #                                   QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        #if reply == QMessageBox.Yes:
+        event.accept()
+        #else:
+        #    event.ignore()
 
     def get_task_by_id(self, task_id):
         for task in self.tasks_list:
@@ -65,20 +78,21 @@ class MainWindow(QtGui.QWidget):
         task.hide()
         self.tasks_list.remove(task)
         self.layout.removeWidget(task)
-        QtCore.QCoreApplication.sendPostedEvents()
+        QCoreApplication.sendPostedEvents()
         self.resize(self.minimumSize())
         self.updateGeometry()
-
 
     def add_new_task(self):
         task = TaskWidget(self.next_task_id)
         self.layout.addWidget(task)
         self.tasks_list.append(task)
-        self.connect(self.tasks_list[len(self.tasks_list)-1].remove_btn, QtCore.SIGNAL('task_removed'), self.process_remove_task)
+        self.connect(self.tasks_list[len(self.tasks_list)-1].remove_btn, SIGNAL('task_removed'), self.process_remove_task)
         self.next_task_id = self.next_task_id + 1
-        self.connect(task, QtCore.SIGNAL('textEntered'), self.task_edited)
+        self.connect(task, SIGNAL('textEntered'), self.task_edited)
 
-
-
+    def export(self):
+        for task in self.tasks_list:
+            task = task.extract_task_object()
+            print(task)
 
 

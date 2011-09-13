@@ -1,17 +1,20 @@
-import sys
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from JobPlanner import *
 
 
-app = QtGui.QApplication(sys.argv)
+from PyQt4.QtGui import QApplication
 
-main_win = MainWindow()
-systry = ApplicationSystemTry(main_win)
-systry.show()
-main_win.show()
+from MainWindow import *
+from SystemTryIcon import *
 
-sys.exit(app.exec_())
 
+if __name__ == "__main__":
+    import sys
+    app = QApplication(sys.argv)
+    
+    main_win = MainWindow()
+    systry = ApplicationSystemTry(main_win)
+    systry.show()
+    main_win.show()
+    sys.exit(app.exec_())
+    
 
 

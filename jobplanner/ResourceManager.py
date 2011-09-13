@@ -1,6 +1,8 @@
 
-from PyQt4 import QtCore, QtGui
 from os import path
+from PyQt4.QtCore import QSize 
+from PyQt4.QtGui import QFontMetrics
+
 
 # to jest komentarz do tego jak kod dziala
 class ResourceManager:
@@ -9,12 +11,12 @@ class ResourceManager:
 
     __instance = None
     images_root_dir = "img" #path.join(path.pardir, 'img')
-    icon_image_max_size = QtCore.QSize(25, 25)
+    icon_image_max_size = QSize(25, 25)
 
     def __init__(self):
         pass
 
-    def __new__(classtype, *args, **kwargs):
+    def __new__(classtype, *argds, **kwargs):
         if classtype != type(classtype.__instance):
             classtype.__instance = object.__new__(classtype, *args, **kwargs)
         return classtype.__instance
@@ -30,7 +32,7 @@ class ResourceManager:
 
     def get_widthest_char_size(self,  widget):
         font = widget.font()
-        return QtGui.QFontMetrics(font).maxWidth()
+        return QFontMetrics(font).maxWidth()
 
 
 resourceManager = ResourceManager()
